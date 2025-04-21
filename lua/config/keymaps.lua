@@ -144,15 +144,22 @@ map("n", "<leader>|", "<C-W>v", { desc = "Split window right", remap = true })
 
 map("n", "<leader>!", ":Say ", {desc = "Say "})
 
-vim.keymap.set('n', '<D-e>', function()
-  local win = vim.api.nvim_get_current_win()
-  local buf = vim.api.nvim_win_get_buf(win)
-  local ft = vim.bo[buf].filetype
+map('n', '<D-e>', function()
+  local wins = vim.api.nvim_list_wins()
+  local current = vim.api.nvim_get_current_win()
 
-  if ft == 'neo-tree' then
-    vim.cmd('wincmd l')  -- switch to the file window (assuming Neo-tree is on the left)
-  else
-    vim.cmd('wincmd h')  -- switch to Neo-tree (if it's open)
+  for _, win in ipairs(wins) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local ft = vim.bo[buf].filetype
+    if ft:match("neo%-tree") then
+      if win == current then
+        -- If you're on Neo-tree, go right
+        vim.cmd('wincmd l')
+      else
+        -- If you're not on Neo-tree, go to it
+        vim.api.nvim_set_current_win(win)
+      end
+      return
+    end
   end
 end, { desc = "Toggle focus between Neo-tree and file" })
-
